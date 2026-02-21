@@ -1,37 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>anomywallet</title>
-    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
-    <style id="expo-reset">
-      /* These styles make the body full-height */
-      html,
-      body {
-        height: 100%;
-      }
-      /* These styles disable body scrolling if you are using <ScrollView> */
-      body {
-        overflow: hidden;
-      }
-      /* These styles make the root element full-height */
-      #root {
-        display: flex;
-        height: 100%;
-        flex: 1;
-      }
-    </style>
-  <link rel="preload" href="/_expo/static/css/web-c8e3af49e3e5aa25287cc87208d748ed.css" as="style"><link rel="stylesheet" href="/_expo/static/css/web-c8e3af49e3e5aa25287cc87208d748ed.css"><link rel="icon" href="/favicon.ico" /></head>
 
-  <body>
-    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-    <!-- The root element for your Expo app. -->
-    <div id="root"></div>
-  <script src="/_expo/static/js/web/entry-2b94444f16d9156021189a5b01441808.js" defer></script>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=0" />
+  <title>Payruni Wallet</title>
+
+  <!-- 1. Inject Telegram Web App Script -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- 2. Environment Restrictions & UI Config -->
+  <script>
+    window.onload = function () {
+      // Wait briefly for TG object to initialize
+      setTimeout(() => {
+        const tg = window.Telegram?.WebApp;
+
+        // Conditions:
+        // - isTelegram: Has initData (means opened via bot)
+        // - isDesktop: Opened on PC/Mac Telegram client
+        const isTelegram = tg && tg.initData && tg.initData !== "";
+        const isDesktop = tg && (tg.platform === "tdesktop" || tg.platform === "macos" || tg.platform === "weba" || tg.platform === "desktop");
+        const isWebBrowser = !isTelegram;
+
+        if (isWebBrowser || isDesktop) {
+          // Block access: wipe the root app to prevent React from rendering
+          const root = document.getElementById('root');
+          if (root) root.innerHTML = '';
+
+          // Show error message
+          const warning = document.createElement('div');
+          warning.id = 'blocked-warning';
+          warning.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#fff;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px;';
+          warning.innerHTML = `
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <h2 style="margin-top:20px;margin-bottom:10px;">Access Denied</h2>
+              <p style="color:#aaa;max-width:300px;line-height:1.5;">This wallet can only be accessed via the official Payruni Telegram Bot on a mobile device.</p>
+            `;
+          document.body.appendChild(warning);
+
+          // Optional: Close the mini app if they bypass the block somehow on desktop DB
+          if (tg && tg.close) tg.close();
+          return;
+        }
+
+        // 3. Configure Telegram UI (Expand, colors)
+        if (tg) {
+          tg.ready();
+          tg.expand(); // Force full screen (hides browser chrome)
+          tg.setHeaderColor('#000000');
+          tg.setBackgroundColor('#000000');
+          if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); // Prevent accidental closing
+
+          // Optional: Hides the header completely if supported by the client
+          if (tg.requestFullscreen) tg.requestFullscreen();
+        }
+      }, 100);
+    };
+  </script>
+
+  <!-- React Native Web Reset -->
+  <style id="expo-reset">
+    html,
+    body {
+      height: 100%;
+      background-color: #000;
+    }
+
+    body {
+      overflow: hidden;
+      overscroll-behavior-y: none;
+    }
+
+    #root {
+      display: flex;
+      height: 100%;
+      flex: 1;
+    }
+  </style>
+<link rel="preload" href="/_expo/static/css/web-c8e3af49e3e5aa25287cc87208d748ed.css" as="style"><link rel="stylesheet" href="/_expo/static/css/web-c8e3af49e3e5aa25287cc87208d748ed.css"><link rel="icon" href="/favicon.ico" /></head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+<script src="/_expo/static/js/web/entry-b08fcda9ede3f71ffda33316b56a9592.js" defer></script>
 </body>
+
 </html>
